@@ -1,7 +1,5 @@
 package com.ailearn.agent;
 
-import com.ailearn.tools.CalculatorTool;
-import com.ailearn.tools.WeatherTool;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
@@ -26,9 +24,7 @@ public class AgentService {
 
     private final ChatClient agentClient;
 
-    public AgentService(ChatClient.Builder builder,
-                        WeatherTool weatherTool,
-                        CalculatorTool calculatorTool) {
+    public AgentService(ChatClient.Builder builder) {
         this.agentClient = builder
                 .defaultSystem("""
                         你是一个专业的旅游规划 AI 助手，具有以下能力：
@@ -39,21 +35,19 @@ public class AgentService {
                         请主动使用工具获取真实信息，而不是凭空猜测。
                         思考步骤：先了解目的地天气 -> 制定行程 -> 估算费用 -> 给出建议
                         """)
-                // 注册所有可用工具，模型按需调用
-                .defaultFunctions("weatherTool", "calculatorTool")
+                // defaultTools 替代已废弃的 defaultFunctions，注册 Bean 名称
+                .defaultTools("weatherTool", "calculatorTool")
                 .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
                 .build();
     }
 
     public String planTravel(String destination, int days) {
-        String prompt = """
-                请帮我规划 %s 的 %d 天旅游计划。
-                要求：
-                1. 先查询目的地天气，根据天气推荐合适的活动
-                2. 规划每天的行程安排
-                3. 估算大概费用（住宿 400元/晚，餐饮 150元/天，景点 200元/天）
-                4. 给出行前准备建议
-                """.formatted(destination, days);
+        String prompt = "请帮我规划 " + destination + " 的 " + days + " 天旅游计划。\n"
+                + "要求：\n"
+                + "1. 先查询目的地天气，根据天气推荐合适的活动\n"
+                + "2. 规划每天的行程安排\n"
+                + "3. 估算大概费用（住宿 400元/晚，餐饮 150元/天，景点 200元/天）\n"
+                + "4. 给出行前准备建议";
 
         return agentClient.prompt()
                 .user(prompt)

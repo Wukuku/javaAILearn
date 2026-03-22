@@ -28,11 +28,13 @@ public class CalculatorTool implements Function<CalculatorTool.Request, Calculat
             case "+" -> request.a() + request.b();
             case "-" -> request.a() - request.b();
             case "*" -> request.a() * request.b();
-            case "/" -> request.b() != 0 ? request.a() / request.b()
-                    : throw new IllegalArgumentException("除数不能为零");
+            case "/" -> {
+                if (request.b() == 0) throw new IllegalArgumentException("除数不能为零");
+                yield request.a() / request.b();
+            }
             default -> throw new IllegalArgumentException("不支持的运算符: " + request.operator());
         };
-        String expr = "%s %s %s = %s".formatted(request.a(), request.operator(), request.b(), result);
+        String expr = request.a() + " " + request.operator() + " " + request.b() + " = " + result;
         return new Response(result, expr);
     }
 }
