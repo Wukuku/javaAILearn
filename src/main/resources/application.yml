@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: java-ai-learn
+
+  ai:
+    # ====================================================
+    # OpenAI 配置（支持 DeepSeek、阿里云等兼容 OpenAI 协议的服务）
+    # ====================================================
+    openai:
+      api-key: ${OPENAI_API_KEY:your-api-key-here}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}   # 可换成 DeepSeek / 阿里云 地址
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+          temperature: 0.7
+      # 如果使用 DeepSeek，替换如下：
+      # base-url: https://api.deepseek.com
+      # chat.options.model: deepseek-chat
+
+    # ====================================================
+    # Ollama 配置（本地模型，无需 API key）
+    # 需先安装 Ollama: https://ollama.ai
+    # ====================================================
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: qwen2.5:7b      # 推荐中文模型
+          temperature: 0.7
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    org.springframework.ai: DEBUG   # 开启 Spring AI 日志，方便学习调试
+    com.ailearn: DEBUG
