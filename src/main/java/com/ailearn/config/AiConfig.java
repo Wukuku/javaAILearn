@@ -1,6 +1,7 @@
 package com.ailearn.config;
 
 import com.ailearn.tools.CalculatorTool;
+import com.ailearn.tools.DateTimeTool;
 import com.ailearn.tools.WeatherTool;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
@@ -51,5 +52,11 @@ public class AiConfig {
     @Description("执行基础数学运算：加减乘除")
     public Function<CalculatorTool.Request, CalculatorTool.Response> calculatorTool(CalculatorTool calculatorTool) {
         return calculatorTool;
+    }
+
+    @Bean
+    @Description("获取当前日期时间，或计算两个日期之间相差的天数")
+    public Function<DateTimeTool.Request, DateTimeTool.Response> dateTimeTool(DateTimeTool dateTimeTool) {
+        return dateTimeTool;
     }
 }

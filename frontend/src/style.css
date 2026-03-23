@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-sidebar: #1f2937;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --user-bubble: #0ea5e9;
+  --ai-bubble: #f3f4f6;
+}
+
+.dark {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-sidebar: #0f0f23;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --user-bubble: #0284c7;
+  --ai-bubble: #1e293b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+/* Markdown styles inside AI bubbles */
+.prose-ai h1, .prose-ai h2, .prose-ai h3 {
+  font-weight: 600;
+  margin: 0.75em 0 0.25em;
+}
+.prose-ai h1 { font-size: 1.25em; }
+.prose-ai h2 { font-size: 1.1em; }
+.prose-ai h3 { font-size: 1em; }
+.prose-ai p { margin: 0.5em 0; }
+.prose-ai ul, .prose-ai ol { margin: 0.5em 0; padding-left: 1.5em; }
+.prose-ai li { margin: 0.25em 0; }
+.prose-ai code {
+  background: rgba(0,0,0,0.08);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+.dark .prose-ai code {
+  background: rgba(255,255,255,0.1);
+}
+.prose-ai pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75em 0;
+}
+.prose-ai pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+.prose-ai blockquote {
+  border-left: 3px solid #0ea5e9;
+  padding-left: 1em;
+  color: #64748b;
+  margin: 0.5em 0;
+}
+.prose-ai table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75em 0;
+}
+.prose-ai th, .prose-ai td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+.prose-ai th {
+  background: #f8fafc;
+}
+.dark .prose-ai th {
+  background: #1e293b;
+}
+.dark .prose-ai th, .dark .prose-ai td {
+  border-color: #334155;
+}

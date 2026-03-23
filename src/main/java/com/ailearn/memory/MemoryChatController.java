@@ -1,16 +1,25 @@
 package com.ailearn.memory;
 
+import com.ailearn.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 /**
- * 模块二：多轮对话（会话记忆）
+ * Memory Chat Controller —— 多轮对话接口
  *
- * 知识点：
- * - ChatMemory：Spring AI 的对话记忆抽象
- * - InMemoryChatMemory：内存实现（开发测试用）
- * - conversationId：通过 ID 隔离不同用户的对话历史
- * - 上下文窗口管理：历史消息过多时的截断策略
+ * 接口列表：
+ * GET    /memory/chat                          带记忆的对话
+ * GET    /memory/history/{conversationId}      获取完整对话历史
+ * GET    /memory/stats/{conversationId}        获取会话统计
+ * DELETE /memory/chat/{conversationId}         清除会话历史
+ *
+ * 测试多轮效果：
+ *   1. GET /memory/chat?conversationId=u001&message=我叫张三，是一名Java工程师
+ *   2. GET /memory/chat?conversationId=u001&message=我叫什么名字，做什么的？  ← 能记住
+ *   3. GET /memory/chat?conversationId=u002&message=我叫什么名字？           ← 不知道（不同会话）
  */
 @RestController
 @RequestMapping("/memory")
@@ -21,27 +30,37 @@ public class MemoryChatController {
 
     /**
      * 带记忆的对话
-     * conversationId 相同的请求共享同一段对话历史
-     *
-     * 示例：
-     * GET /memory/chat?conversationId=user001&message=我叫张三
-     * GET /memory/chat?conversationId=user001&message=我叫什么名字？   <- 模型能记住
-     * GET /memory/chat?conversationId=user002&message=我叫什么名字？   <- 不同会话，不知道
+     * historySize 控制携带多少条历史（越多越消耗 tokens）
      */
     @GetMapping("/chat")
-    public String chat(
+    public ApiResponse<String> chat(
             @RequestParam String conversationId,
-            @RequestParam String message) {
-        return memoryChatService.chat(conversationId, message);
+            @RequestParam String message,
+            @RequestParam(defaultValue = "20") int historySize) {
+        return ApiResponse.success(memoryChatService.chat(conversationId, message, historySize));
     }
 
     /**
-     * 清除指定会话的历史
-     * DELETE /memory/chat/user001
+     * 获取完整对话历史
+     * 返回：[{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
      */
+    @GetMapping("/history/{conversationId}")
+    public ApiResponse<List<Map<String, String>>> history(@PathVariable String conversationId) {
+        return ApiResponse.success(memoryChatService.getHistory(conversationId));
+    }
+
+    /**
+     * 会话统计
+     * 返回：消息总数、用户消息数、AI 消息数、估算 token 数
+     */
+    @GetMapping("/stats/{conversationId}")
+    public ApiResponse<ConversationStats> stats(@PathVariable String conversationId) {
+        return ApiResponse.success(memoryChatService.getStats(conversationId));
+    }
+
     @DeleteMapping("/chat/{conversationId}")
-    public String clearMemory(@PathVariable String conversationId) {
+    public ApiResponse<Void> clear(@PathVariable String conversationId) {
         memoryChatService.clearMemory(conversationId);
-        return "会话 [" + conversationId + "] 历史已清除";
+        return ApiResponse.success();
     }
 }
