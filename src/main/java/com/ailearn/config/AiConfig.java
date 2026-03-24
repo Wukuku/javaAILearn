@@ -3,6 +3,7 @@ package com.ailearn.config;
 import com.ailearn.tools.CalculatorTool;
 import com.ailearn.tools.DateTimeTool;
 import com.ailearn.tools.WeatherTool;
+import com.ailearn.telesales.tool.CrmTool;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -58,5 +59,15 @@ public class AiConfig {
     @Description("获取当前日期时间，或计算两个日期之间相差的天数")
     public Function<DateTimeTool.Request, DateTimeTool.Response> dateTimeTool(DateTimeTool dateTimeTool) {
         return dateTimeTool;
+    }
+
+    /**
+     * CRM 客户查询工具 —— 供电销 Agent 使用
+     * Agent 在对话中自主决定何时调用此工具查询客户画像
+     */
+    @Bean
+    @Description("查询客户CRM信息：客户分类、风险等级、持有产品、历史通话记录和备注")
+    public Function<CrmTool.Request, CrmTool.Response> crmTool(CrmTool crmTool) {
+        return crmTool;
     }
 }

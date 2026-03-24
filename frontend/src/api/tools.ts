@@ -18,7 +18,7 @@ export const toolsApi = {
   multi: (message: string) =>
     fetchJson<ApiResponse<string>>(`${BASE}/multi?message=${encodeURIComponent(message)}`),
 
-  call: (tool: ToolType, message: string) => {
+  call: (tool: ToolType, message: string): Promise<ApiResponse<string>> => {
     switch (tool) {
       case 'weather': return toolsApi.weather(message)
       case 'calculate': return toolsApi.calculate(message)

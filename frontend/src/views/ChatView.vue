@@ -97,9 +97,8 @@ import { ref, nextTick } from 'vue'
 import MessageBubble from '@/components/MessageBubble.vue'
 import ChatInput from '@/components/ChatInput.vue'
 import { chatApi, type TokenUsageInfo, type ChatPersona } from '@/api/chat'
-import { useChatStore, type Message } from '@/stores/chat'
+import type { Message } from '@/stores/chat'
 
-const store = useChatStore()
 const messages = ref<Message[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)

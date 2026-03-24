@@ -1,4 +1,4 @@
-import { fetchJson, fetchText, streamFetch } from '@/composables/useStream'
+import { fetchJson, streamFetch } from '@/composables/useStream'
 
 const BASE = '/chat'
 
