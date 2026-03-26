@@ -96,9 +96,10 @@ public class SimulationService {
         // Step 3: 流式生成（带会话记忆）
         return chatClientBuilder
                 .defaultSystem("""
-                        你是专业的企业服务销售顾问"小智"。
+                        你是持牌消费金融公司的信贷顾问"小慧"。
                         根据提供的意图分析和参考话术，给出自然、简洁的回应。
                         回复必须口语化，适合电话直接说出，不要有格式符号。
+                        严守合规底线：不承诺放款结果，不虚报利率，不强行推销。
                         """)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(memory))
                 .build()

@@ -61,7 +61,7 @@ public class RagService {
                         """)
                 .defaultAdvisors(
                         new QuestionAnswerAdvisor(vectorStore,
-                                SearchRequest.defaults().withTopK(5).withSimilarityThreshold(0.65))
+                                SearchRequest.builder().topK(5).similarityThreshold(0.65).build())
                 )
                 .build();
     }
@@ -124,14 +124,16 @@ public class RagService {
      * @param source             可选：按来源过滤
      */
     public List<SearchResult> search(String query, int topK, double similarityThreshold, String source) {
-        SearchRequest request = SearchRequest.query(query)
-                .withTopK(topK)
-                .withSimilarityThreshold(similarityThreshold);
+        SearchRequest.Builder builder = SearchRequest.builder()
+                .query(query)
+                .topK(topK)
+                .similarityThreshold(similarityThreshold);
 
-        // 元数据过滤：如果指定了 source，只在该来源内检索
         if (source != null && !source.isBlank()) {
-            request = request.withFilterExpression("source == '" + source + "'");
+            builder.filterExpression("source == '" + source + "'");
         }
+
+        SearchRequest request = builder.build();
 
         return vectorStore.similaritySearch(request).stream()
                 .map(doc -> new SearchResult(
@@ -162,10 +164,12 @@ public class RagService {
     public String askWithSource(String question, String source) {
         return ChatClient.builder(chatClient.mutate()
                         .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
-                                SearchRequest.query(question)
-                                        .withTopK(5)
-                                        .withSimilarityThreshold(0.65)
-                                        .withFilterExpression("source == '" + source + "'")))
+                                SearchRequest.builder()
+                                        .query(question)
+                                        .topK(5)
+                                        .similarityThreshold(0.65)
+                                        .filterExpression("source == '" + source + "'")
+                                        .build()))
                         .build())
                 .build()
                 .prompt()
