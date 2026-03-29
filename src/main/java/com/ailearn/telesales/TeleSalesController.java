@@ -1,6 +1,7 @@
 package com.ailearn.telesales;
 
 import com.ailearn.common.ApiResponse;
+import com.ailearn.telesales.model.CallSession;
 import com.ailearn.telesales.model.IntentAnalysis;
 import com.ailearn.telesales.model.QualityReport;
 import com.ailearn.telesales.model.ScriptMatch;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 智能电销 AI Agent 平台 —— 统一入口
@@ -54,6 +56,7 @@ public class TeleSalesController {
     private final DialogueService dialogueService;
     private final QualityService qualityService;
     private final SimulationService simulationService;
+    private final CallSessionManager sessionManager;
 
     // ==================== 意图分析 ====================
 
@@ -165,6 +168,62 @@ public class TeleSalesController {
                     request.conversationId(), request.speech(), request.intent());
         }
         return simulationService.simulateAuto(request.conversationId(), request.speech());
+    }
+
+    // ==================== 会话管理 ====================
+
+    /**
+     * 创建通话会话（通话开始时调用）
+     * GET /telesales/session/start?conversationId=call-001&customerId=C001
+     */
+    @PostMapping("/session/start")
+    public ApiResponse<Map<String, Object>> startSession(
+            @RequestParam String conversationId,
+            @RequestParam(required = false, defaultValue = "unknown") String customerId) {
+        if (conversationId == null || conversationId.isBlank()) {
+            throw new IllegalArgumentException("conversationId 不能为空");
+        }
+        CallSession session = sessionManager.getOrCreate(conversationId, customerId);
+        return ApiResponse.success(Map.of(
+                "conversationId", session.conversationId(),
+                "customerId", session.customerId(),
+                "status", session.status().name(),
+                "startTime", session.startTime().toString()
+        ));
+    }
+
+    /**
+     * 结束通话会话
+     * POST /telesales/session/end?conversationId=call-001&status=ENDED
+     */
+    @PostMapping("/session/end")
+    public ApiResponse<Map<String, Object>> endSession(
+            @RequestParam String conversationId,
+            @RequestParam(defaultValue = "ENDED") String status) {
+        CallSession.CallStatus callStatus;
+        try {
+            callStatus = CallSession.CallStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("status 只支持：ENDED / ABANDONED");
+        }
+        sessionManager.endSession(conversationId, callStatus);
+        return sessionManager.find(conversationId)
+                .map(s -> ApiResponse.success(Map.of(
+                        "conversationId", s.conversationId(),
+                        "status", s.status().name(),
+                        "totalTurns", s.turnCount().get(),
+                        "durationSeconds", s.durationSeconds()
+                )))
+                .orElse(ApiResponse.error(404, "会话不存在: " + conversationId));
+    }
+
+    /**
+     * 查看系统监控统计（活跃通话数、已结束数等）
+     * GET /telesales/session/stats
+     */
+    @GetMapping("/session/stats")
+    public ApiResponse<Map<String, Long>> sessionStats() {
+        return ApiResponse.success(sessionManager.stats());
     }
 
     // ==================== Request Records ====================

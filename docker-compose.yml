@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+
+  # ================================================================
+  # pgvector —— PostgreSQL + 向量扩展，替换 SimpleVectorStore
+  # Spring AI 官方推荐向量库，支持余弦/L2/内积检索
+  # ================================================================
+  pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: ailearn-pgvector
+    environment:
+      POSTGRES_DB: ailearn
+      POSTGRES_USER: ailearn
+      POSTGRES_PASSWORD: ailearn123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ailearn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ================================================================
+  # Redis —— 替换 InMemoryChatMemory，实现对话记忆持久化
+  # 重启应用后历史对话不丢失，支持多实例共享
+  # ================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: ailearn-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass redis123
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ================================================================
+  # MySQL —— 业务数据库（CRM客户数据、话术库元数据、通话记录等）
+  # ================================================================
+  mysql:
+    image: mysql:8.0
+    container_name: ailearn-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: ailearn
+      MYSQL_USER: ailearn
+      MYSQL_PASSWORD: ailearn123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "ailearn", "-pailearn123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgvector_data:
+  redis_data:
+  mysql_data:

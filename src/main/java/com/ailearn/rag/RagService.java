@@ -162,15 +162,14 @@ public class RagService {
      * 只在指定 source 的文档中检索，实现多租户知识隔离
      */
     public String askWithSource(String question, String source) {
-        return ChatClient.builder(chatClient.mutate()
-                        .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
-                                SearchRequest.builder()
-                                        .query(question)
-                                        .topK(5)
-                                        .similarityThreshold(0.65)
-                                        .filterExpression("source == '" + source + "'")
-                                        .build()))
-                        .build())
+        return chatClient.mutate()
+                .defaultAdvisors(new QuestionAnswerAdvisor(vectorStore,
+                        SearchRequest.builder()
+                                .query(question)
+                                .topK(5)
+                                .similarityThreshold(0.65)
+                                .filterExpression("source == '" + source + "'")
+                                .build()))
                 .build()
                 .prompt()
                 .user(question)
